@@ -3,6 +3,24 @@ module CanCan
   # it holds the information about a "can" call made on Ability and provides
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
+    include Comparable
+    
+    def <=> (other)
+    end
+
+    def == (other)
+      true
+      # if @match_all == other.match_all
+      #   true
+      # else
+      #   if @base_behavior == other.base_behavior && @actions == other.actions && @subjects == other.subjects
+      #     true
+      #   else
+      #     false
+      # end
+    end
+
+
     attr_reader :base_behavior, :subjects, :actions, :conditions
     attr_writer :expanded_actions
 
