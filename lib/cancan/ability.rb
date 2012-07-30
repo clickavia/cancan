@@ -86,13 +86,13 @@ module CanCan
         #   other_user_or_role.role
         # end
 
-        # if User::ROLES.include?(role)
-        #   compare_rules(role)
-        # else
-        #   raise Error.new('given roles is not a valid one (could not find it in User::ROLES array)')
-        # end
+        if User::ROLES.include?(role)
+          compare_rules(role)
+        else
+          raise Error.new('given roles is not a valid one (could not find it in User::ROLES array)')
+        end
 
-        compare_rules(role)
+        # compare_rules(role)
         # "#{role} from #{other_user_or_role}"
 
 
@@ -293,7 +293,11 @@ module CanCan
 
       # @rules_original <=> @rules_to_compare
       # @rules_original.include?(@rules_to_compare)
-      @rules_original.each_cons(@rules_to_compare.size).include?(@rules_to_compare)
+      unless @rules_to_compare.empty?
+        @rules_original.each_cons(@rules_to_compare.size).include?(@rules_to_compare)
+      else
+        true
+      end
       # @rules_to_compare.include?(@rules_original)
     end
 
