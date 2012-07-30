@@ -6,7 +6,17 @@ module CanCan
     include Comparable
     
     def <=> (other)
-      1
+      if match_all == other.match_all && match_all == true
+        0
+      else
+        if base_behavior == other.base_behavior && actions == other.actions && subjects == other.subjects
+          unless conditions or block or other.conditions or other.block
+            true
+          else
+            compare_conditions(other)
+          end
+        end
+      end
     end
 
     def == (other)
@@ -14,7 +24,12 @@ module CanCan
         true
       else
         if base_behavior == other.base_behavior && actions == other.actions && subjects == other.subjects
-          true
+          if conditions.empty? and block.nil? and other.conditions.empty? and other.block.nil?
+            true
+          else
+            # true
+            compare_conditions(other)
+          end
         else
           false
         end
@@ -22,7 +37,7 @@ module CanCan
     end
 
 
-    attr_reader :base_behavior, :subjects, :actions, :conditions, :match_all
+    attr_reader :base_behavior, :subjects, :actions, :conditions, :match_all, :block
     attr_writer :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
@@ -94,6 +109,66 @@ module CanCan
     end
 
     private
+
+    def compare_conditions(other)
+      if only_block? or other.only_block?
+        if !block.nil? and other.block.nil?
+          false
+        elsif !block.nil? and !other.block.nil?
+          true 
+        elsif block.nil? and !other.block.nil?
+          true
+        end
+
+      elsif !conditions.empty? or !other.conditions.empty?
+        if conditions.empty? and !other.conditions.empty?
+          true
+        elsif !conditions.empty? and other.conditions.empty?
+          false
+        elsif !conditions.empty? and !other.conditions.empty?
+          true
+        end
+      else
+        true
+      end
+
+      # block_compared = false
+      # conditions_compared = false
+
+      # if conditions.empty? and !other.conditions.empty?
+      #   conditions_compared = true
+      # end
+      # # temp
+      # if !conditions.empty? and !other.conditions.empty?
+      #   conditions_compared = true
+      # end
+      # if !conditions.empty? and other.conditions.empty?
+      #   conditions_compared = false
+      # end
+      # # temp solution for hash comparasion
+      # if conditions.empty? and other.conditions.empty?
+      #   true
+      # end
+
+      # if block.nil? and !other.block.nil?
+      #   block_compared = true
+      # end
+      # if !block.nil? and !other.block.nil?
+      #   block_compared = true
+      # end
+      # if !block.nil? and other.block.nil?
+      #   block_compared = false
+      # end
+      # if block.nil? and other.block.nil?
+      #   block_compared = true
+      # end
+
+      # if block_compared and conditions_compared
+      #   true
+      # else
+      #   false
+      # end
+    end
 
     def subject_class?(subject)
       klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
