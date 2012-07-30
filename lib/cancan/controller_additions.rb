@@ -289,7 +289,7 @@ module CanCan
 
     def self.included(base)
       base.extend ClassMethods
-      base.helper_method :can?, :cannot?, :current_ability
+      base.helper_method :can?, :cannot?, :current_ability, :can_do_more_than?
     end
 
     # Raises a CanCan::AccessDenied exception if the current_ability cannot
@@ -381,6 +381,11 @@ module CanCan
     #
     def cannot?(*args)
       current_ability.cannot?(*args)
+    end
+
+    def can_do_more_than?(role)
+      current_ability.can_do_more_than?(role)
+      # current_ability.can_do_more_than?(*args)
     end
   end
 end

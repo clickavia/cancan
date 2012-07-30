@@ -68,6 +68,39 @@ module CanCan
       !can?(*args)
     end
 
+    # This methods checks for current_user having more rights than given role, or user
+    # this emplements some validation and also Comparable module in Rule class
+    def can_do_more_than?(other_user_or_role)
+      # if arg string, ssymbol or other user
+      if (other_user_or_role.is_a?(String) or other_user_or_role.is_a?(Symbol) or other_user_or_role.is_a?(User))
+        # than assign role to local var
+        role = other_user_or_role if other_user_or_role.is_a?(String)
+        role = other_user_or_role.to_s if other_user_or_role.is_a?(Symbol)
+        role = other_user_or_role.role if other_user_or_role.is_a?(User)
+        # role = case other_user_or_role
+        # when is_a?(String)
+        #   other_user_or_role
+        # when is_a?(Symbol)
+        #   other_user_or_role.to_s
+        # when is_a?(User)
+        #   other_user_or_role.role
+        # end
+
+        # if User::ROLES.include?(role)
+        #   compare_rules(role)
+        # else
+        #   raise Error.new('given roles is not a valid one (could not find it in User::ROLES array)')
+        # end
+
+        compare_rules(role)
+        # "#{role} from #{other_user_or_role}"
+
+
+      else
+        raise ArgumentError.new('this methods accepts args as strings and symbols for roles or User class instance')
+      end
+    end
+
     # Defines which abilities are allowed using two arguments. The first one is the action
     # you're setting the permission for, the second one is the class of object you're setting it on.
     #
@@ -242,6 +275,27 @@ module CanCan
     end
 
     private
+
+    def compare_rules(role)
+      # here we backed up our rules as it was
+      # and clear the array. send(role) will call new can and cannot methods
+      # and build up new rules array - but the best part - it will have same 
+      # conditions with User.dependencies
+      @rules_original = [].replace(@rules)
+      @rules.clear
+
+      send(role)
+
+      @rules_to_compare = [].replace(@rules)
+      @rules = @rules.clear().replace(@rules_original)
+      # "original = #{@rules_original.count}, to compare = #{@rules_to_compare.count}, now rules is #{@rules.count}"
+      # @rules_original @rules_to_compare
+
+      # @rules_original <=> @rules_to_compare
+      # @rules_original.include?(@rules_to_compare)
+      @rules_original.each_cons(@rules_to_compare.size).include?(@rules_to_compare)
+      # @rules_to_compare.include?(@rules_original)
+    end
 
     def unauthorized_message_keys(action, subject)
       subject = (subject.class == Class ? subject : subject.class).name.underscore unless subject.kind_of? Symbol

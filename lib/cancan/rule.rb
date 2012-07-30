@@ -6,22 +6,23 @@ module CanCan
     include Comparable
     
     def <=> (other)
+      1
     end
 
     def == (other)
-      true
-      # if @match_all == other.match_all
-      #   true
-      # else
-      #   if @base_behavior == other.base_behavior && @actions == other.actions && @subjects == other.subjects
-      #     true
-      #   else
-      #     false
-      # end
+      if match_all == other.match_all && match_all == true
+        true
+      else
+        if base_behavior == other.base_behavior && actions == other.actions && subjects == other.subjects
+          true
+        else
+          false
+        end
+      end
     end
 
 
-    attr_reader :base_behavior, :subjects, :actions, :conditions
+    attr_reader :base_behavior, :subjects, :actions, :conditions, :match_all
     attr_writer :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
