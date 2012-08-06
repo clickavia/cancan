@@ -4,34 +4,19 @@ module CanCan
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
     include Comparable
-    
-    def <=> (other)
-      if match_all == other.match_all && match_all == true
-        0
-      else
-        if base_behavior == other.base_behavior && actions == other.actions && subjects == other.subjects
-          unless conditions or block or other.conditions or other.block
-            true
-          else
-            compare_conditions(other)
-          end
-        end
-      end
+    def <=>
     end
 
     def == (other)
-      if match_all == other.match_all && match_all == true
-        true
+      if @conditions.empty? and @block.nil?
+        return true if @match_all and @base_behavior
+        return true if @actions.include?(:manage) and @subjects.include?(:all)
+        if @base_behavior == other.base_behavior && (@actions.include?(:manage) || @actions.each_cons(other.actions.size).include?(other.actions)) && (@subjects.include?(:all) || @subjects.each_cons(other.subjects.size).include?(other.subjects))
+          true
+        end
       else
-        if base_behavior == other.base_behavior && actions == other.actions && subjects == other.subjects
-          if conditions.empty? and block.nil? and other.conditions.empty? and other.block.nil?
-            true
-          else
-            # true
-            compare_conditions(other)
-          end
-        else
-          false
+        if @base_behavior == other.base_behavior && (@actions.include?(:manage) || @actions.each_cons(other.actions.size).include?(other.actions)) && (@subjects.include?(:all) || @subjects.each_cons(other.subjects.size).include?(other.subjects))
+          compare_conditions(other)
         end
       end
     end
@@ -112,20 +97,20 @@ module CanCan
 
     def compare_conditions(other)
       if only_block? or other.only_block?
-        if !block.nil? and other.block.nil?
+        if !@block.nil? and other.block.nil?
           false
-        elsif !block.nil? and !other.block.nil?
+        elsif !@block.nil? and !other.block.nil?
           true 
-        elsif block.nil? and !other.block.nil?
+        elsif @block.nil? and !other.block.nil?
           true
         end
 
-      elsif !conditions.empty? or !other.conditions.empty?
-        if conditions.empty? and !other.conditions.empty?
+      elsif !@conditions.empty? or !other.conditions.empty?
+        if @conditions.empty? and !other.conditions.empty?
           true
-        elsif !conditions.empty? and other.conditions.empty?
+        elsif !@conditions.empty? and other.conditions.empty?
           false
-        elsif !conditions.empty? and !other.conditions.empty?
+        elsif !@conditions.empty? and !other.conditions.empty?
           true
         end
       else

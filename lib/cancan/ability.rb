@@ -73,29 +73,15 @@ module CanCan
     def can_do_more_than?(other_user_or_role)
       # if arg string, ssymbol or other user
       if (other_user_or_role.is_a?(String) or other_user_or_role.is_a?(Symbol) or other_user_or_role.is_a?(User))
-        # than assign role to local var
         role = other_user_or_role if other_user_or_role.is_a?(String)
         role = other_user_or_role.to_s if other_user_or_role.is_a?(Symbol)
         role = other_user_or_role.role if other_user_or_role.is_a?(User)
-        # role = case other_user_or_role
-        # when is_a?(String)
-        #   other_user_or_role
-        # when is_a?(Symbol)
-        #   other_user_or_role.to_s
-        # when is_a?(User)
-        #   other_user_or_role.role
-        # end
 
         if User::ROLES.include?(role)
           compare_rules(role)
         else
           raise Error.new('given roles is not a valid one (could not find it in User::ROLES array)')
         end
-
-        # compare_rules(role)
-        # "#{role} from #{other_user_or_role}"
-
-
       else
         raise ArgumentError.new('this methods accepts args as strings and symbols for roles or User class instance')
       end
@@ -288,17 +274,15 @@ module CanCan
 
       @rules_to_compare = [].replace(@rules)
       @rules = @rules.clear().replace(@rules_original)
-      # "original = #{@rules_original.count}, to compare = #{@rules_to_compare.count}, now rules is #{@rules.count}"
-      # @rules_original @rules_to_compare
-
-      # @rules_original <=> @rules_to_compare
-      # @rules_original.include?(@rules_to_compare)
       unless @rules_to_compare.empty?
-        @rules_original.each_cons(@rules_to_compare.size).include?(@rules_to_compare)
+        inclusion = true
+        @rules_to_compare.each do |r|
+          inclusion = false unless @rules_original.include?(r)
+        end
+        return inclusion
       else
         true
       end
-      # @rules_to_compare.include?(@rules_original)
     end
 
     def unauthorized_message_keys(action, subject)
