@@ -267,21 +267,25 @@ module CanCan
       # and clear the array. send(role) will call new can and cannot methods
       # and build up new rules array - but the best part - it will have same 
       # conditions with User.dependencies
-      @rules_original = [].replace(@rules)
-      @rules.clear
+      if @rules
+        @rules_original = [].replace(@rules)
+        @rules.clear
 
-      send(role)
+        send(role)
 
-      @rules_to_compare = [].replace(@rules)
-      @rules = @rules.clear().replace(@rules_original)
-      unless @rules_to_compare.empty?
-        inclusion = true
-        @rules_to_compare.each do |r|
-          inclusion = false unless @rules_original.include?(r)
+        @rules_to_compare = [].replace(@rules)
+        @rules = @rules.clear().replace(@rules_original)
+        unless @rules_to_compare.empty?
+          inclusion = true
+          @rules_to_compare.each do |r|
+            inclusion = false unless @rules_original.include?(r)
+          end
+          return inclusion
+        else
+          true
         end
-        return inclusion
       else
-        true
+        false
       end
     end
 
